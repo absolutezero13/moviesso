@@ -1,58 +1,48 @@
+import { Movie } from "@/components/ Movie";
+import Wrapper from "@/components/Wrapper";
 import { Colors } from "@/constants/Colors";
 import { apiService } from "@/services/api";
-import { Movie } from "@/services/types";
+import { Movie as TMovie } from "@/services/types";
+import useMovieStore from "@/store/useMovieSotre";
+import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Image, StyleSheet, Platform, View, Text, Alert } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
-  const [data, setData] = useState<Movie[]>([]);
-
-  useEffect(() => {
-    apiService
-      .getMovies({
+  const { movies } = useMovieStore();
+  const getMovies = async () => {
+    try {
+      await apiService.getMovies({
         searchText: "batman",
         page: 4,
-      })
-      .then((data) => {
-        setData(data.Search);
-      })
-      .catch((error) => {
-        Alert.alert("Error", error.message);
       });
-  }, []);
-
-  const Movie = ({ movie }: { movie: Movie }) => {
-    return (
-      <View style={styles.movie}>
-        <Image source={{ uri: movie.Poster }} style={styles.poster} />
-        <Text style={styles.movieTitle}>{movie.Title}</Text>
-      </View>
-    );
+    } catch (error) {
+      Alert.alert("Error");
+    }
   };
 
+  useEffect(() => {
+    getMovies();
+  }, []);
+
   return (
-    <SafeAreaView style={styles.wrapper}>
+    <Wrapper>
       <Text style={styles.title}>Popular Movies</Text>
       <FlatList
-        data={data}
+        data={movies}
         keyExtractor={(item) => item.imdbID}
         renderItem={({ item }) => <Movie movie={item} />}
         numColumns={2}
         columnWrapperStyle={{ justifyContent: "space-between", marginTop: 10 }}
         showsVerticalScrollIndicator={false}
       />
-    </SafeAreaView>
+    </Wrapper>
   );
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    flex: 1,
-    backgroundColor: Colors.background,
-    paddingHorizontal: 20,
-  },
   title: {
     fontSize: 24,
     fontWeight: "bold",

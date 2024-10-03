@@ -12,6 +12,8 @@ import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StatusBar } from "expo-status-bar";
+import { Colors } from "@/constants/Colors";
+import { Text, View } from "react-native";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -38,7 +40,17 @@ export default function RootLayout() {
         <StatusBar style="light" />
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="movieDetail" />
+          <Stack.Screen
+            name="movieDetail"
+            options={{
+              headerStyle: {
+                backgroundColor: Colors.background,
+              },
+              headerBackTitle: "Back",
+              headerTintColor: Colors.text,
+              headerBackTitleVisible: false,
+            }}
+          />
           <Stack.Screen name="+not-found" />
         </Stack>
       </ThemeProvider>
