@@ -14,5 +14,5 @@ export interface MovieApiResponse {
 
 export type MovieRequestParams = {
   searchText: string;
-  page: number;
+  page?: number;
 };
