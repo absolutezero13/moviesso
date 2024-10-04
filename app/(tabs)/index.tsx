@@ -1,4 +1,3 @@
-import { Movie } from "@/components/ Movie";
 import MovieList from "@/components/MovieList";
 import Wrapper from "@/components/Wrapper";
 import { Colors } from "@/constants/Colors";

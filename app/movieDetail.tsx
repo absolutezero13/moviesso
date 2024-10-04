@@ -1,32 +1,50 @@
 import { Colors } from "@/constants/Colors";
-import useFavoriteMovies from "@/store/useFavoriteMovies";
-import useMovieStore from "@/store/useMovieSotre";
+import { apiService } from "@/services/api";
+import { MovieDetail as TMovieDetail } from "@/services/types";
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import { useEffect } from "react";
-import { Image, Text, View, StyleSheet, Dimensions } from "react-native";
+import { useEffect, useState } from "react";
+import {
+  Image,
+  Text,
+  View,
+  StyleSheet,
+  Dimensions,
+  ActivityIndicator,
+} from "react-native";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
 const MovieDetail = () => {
-  const { movies } = useMovieStore();
-  const { favoriteMovies } = useFavoriteMovies();
+  const [movie, setMovie] = useState<TMovieDetail | null>(null);
   const params = useLocalSearchParams<{ movieId: string }>();
   const navigation = useNavigation();
 
-  const movie =
-    movies.find((movie) => movie.imdbID === params.movieId) ??
-    favoriteMovies.find((movie) => movie.imdbID === params.movieId);
-
   useEffect(() => {
-    navigation.setOptions({
-      title: movie?.Title ?? "Movie",
+    apiService.getMovieById(params.movieId).then((data) => {
+      setMovie(data);
     });
   }, []);
 
-  if (!movie) {
-    return null;
-  }
+  useEffect(() => {
+    navigation.setOptions({
+      title: movie?.Title ?? "",
+    });
+  }, [movie]);
 
+  if (!movie) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: Colors.background,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <ActivityIndicator size="large" color={Colors.text} />
+      </View>
+    );
+  }
   const Info = ({ label, value }: { label: string; value: string }) => {
     return (
       <View style={styles.info}>
@@ -57,6 +75,7 @@ const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
     backgroundColor: Colors.background,
+    justifyContent: "center",
   },
   poster: {
     width: SCREEN_WIDTH,
@@ -78,7 +97,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   infos: {
-    marginTop: 20,
     backgroundColor: "rgba(0, 0, 0, 0.7)",
     borderRadius: 10,
     marginHorizontal: 20,
