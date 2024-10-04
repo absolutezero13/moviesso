@@ -4,6 +4,7 @@ import Wrapper from "@/components/Wrapper";
 import { Colors } from "@/constants/Colors";
 import { apiService } from "@/services/api";
 import useMovieStore from "@/store/useMovieSotre";
+import Checkbox from "expo-checkbox";
 import { useEffect, useRef, useState } from "react";
 import { StyleSheet, View, Text, Alert, ActivityIndicator } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
@@ -19,6 +20,28 @@ export default function HomeScreen() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [showMovies, setShowMovies] = useState(true);
+  const [showSeries, setShowSeries] = useState(true);
+
+  const filteredMovies = movies.filter((movie) => {
+    if (showMovies && showSeries) {
+      return true;
+    }
+
+    if (!showMovies && !showSeries) {
+      return true;
+    }
+
+    if (showMovies) {
+      return movie.Type === "movie";
+    }
+
+    if (showSeries) {
+      return movie.Type === "series";
+    }
+
+    return false;
+  });
 
   const getMovies = async (searchText: string, page = 1) => {
     setError(false);
@@ -36,8 +59,10 @@ export default function HomeScreen() {
         throw new Error("No movies found");
       }
 
+      console.log(data.Search);
+
       useMovieStore.setState({
-        movies: page === 1 ? data.Search : [...movies, ...(data.Search ?? [])],
+        movies: [...movies, ...data.Search],
       });
     } catch (error) {
       useMovieStore.setState({ movies: [] });
@@ -90,6 +115,21 @@ export default function HomeScreen() {
         autoComplete="off"
         autoCapitalize="none"
       />
+      <View style={{ flexDirection: "row", gap: 10, marginVertical: 10 }}>
+        <Text style={styles.checkbox}>Movies</Text>
+        <Checkbox
+          color={Colors.main}
+          value={showMovies}
+          onValueChange={setShowMovies}
+        />
+        <Text style={styles.checkbox}>Series</Text>
+        <Checkbox
+          color={Colors.main}
+          value={showSeries}
+          onValueChange={setShowSeries}
+        />
+      </View>
+
       {error && (
         <View
           style={{
@@ -115,7 +155,7 @@ export default function HomeScreen() {
 
       {!shouldRenderLoading && !error && (
         <MovieList
-          data={movies}
+          data={filteredMovies}
           onEndReached={onEndReached}
           listEmptyComponent={
             <View style={styles.emptyState}>
@@ -173,5 +213,10 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",
+  },
+  checkbox: {
+    color: Colors.text,
+    fontSize: 16,
+    fontWeight: "500",
   },
 });
