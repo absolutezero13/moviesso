@@ -6,35 +6,58 @@ import { apiService } from "@/services/api";
 import useMovieStore from "@/store/useMovieSotre";
 import { useEffect, useRef, useState } from "react";
 import { StyleSheet, View, Text, Alert, ActivityIndicator } from "react-native";
-import { FlatList, TextInput } from "react-native-gesture-handler";
+import { TextInput } from "react-native-gesture-handler";
 
-const INITIAL_SEARCH_TEXT = "batman";
+const INITIAL_SEARCH_TEXT = "superman";
 
 export default function HomeScreen() {
   const { movies } = useMovieStore();
   const textRef = useRef<string>("");
   const timeoutIdRef = useRef<NodeJS.Timeout>();
+  const pageRef = useRef(1);
+  const isFetchingRef = useRef(false);
 
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
 
-  const getMovies = async (searchText?: string) => {
+  const getMovies = async (searchText: string, page = 1) => {
+    setError(false);
+    if (isFetchingRef.current) {
+      return;
+    }
     setLoading(true);
     try {
-      await apiService.getMovies({
-        searchText: searchText ?? INITIAL_SEARCH_TEXT,
+      const data = await apiService.getMovies({
+        searchText,
+        page,
+      });
+
+      if (!data.Search) {
+        throw new Error("No movies found");
+      }
+
+      useMovieStore.setState({
+        movies: page === 1 ? data.Search : [...movies, ...(data.Search ?? [])],
       });
     } catch (error) {
-      Alert.alert("Something went wrong, please try again later");
+      useMovieStore.setState({ movies: [] });
+      if (page === 1) {
+        setError(true);
+      }
     } finally {
+      isFetchingRef.current = false;
       setLoading(false);
     }
   };
 
   const onChangeText = (text: string) => {
-    textRef.current = text;
-
     if (timeoutIdRef.current) {
       clearTimeout(timeoutIdRef.current);
+    }
+    pageRef.current = 1;
+    textRef.current = text;
+    if (text.length < 2) {
+      return;
     }
 
     timeoutIdRef.current = setTimeout(() => {
@@ -42,9 +65,19 @@ export default function HomeScreen() {
     }, 500);
   };
 
+  const onEndReached = () => {
+    if (loading) {
+      return;
+    }
+    getMovies(textRef.current || INITIAL_SEARCH_TEXT, pageRef.current + 1);
+    pageRef.current++;
+  };
   useEffect(() => {
-    getMovies();
+    getMovies(INITIAL_SEARCH_TEXT);
   }, []);
+
+  const shouldRenderLoading = loading && pageRef.current === 1;
+  const shouldRenderBottomLoading = loading && pageRef.current > 1;
 
   return (
     <Wrapper>
@@ -57,16 +90,33 @@ export default function HomeScreen() {
         autoComplete="off"
         autoCapitalize="none"
       />
-      {loading ? (
+      {error && (
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Text style={styles.loadingText}>
+            An error occurred while fetching movies 😢
+          </Text>
+        </View>
+      )}
+
+      {shouldRenderLoading ? (
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
           <Text style={styles.loadingText}>Searching for movies 🍿🔍</Text>
           <ActivityIndicator size="large" color={Colors.text} />
         </View>
-      ) : (
+      ) : null}
+
+      {!shouldRenderLoading && !error && (
         <MovieList
           data={movies}
+          onEndReached={onEndReached}
           listEmptyComponent={
             <View style={styles.emptyState}>
               <Text style={styles.emptyStateText}>
@@ -75,6 +125,11 @@ export default function HomeScreen() {
             </View>
           }
         />
+      )}
+      {shouldRenderBottomLoading && (
+        <View style={{ position: "absolute", bottom: 0, alignSelf: "center" }}>
+          <ActivityIndicator size="large" color={Colors.text} />
+        </View>
       )}
     </Wrapper>
   );
@@ -117,5 +172,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     fontSize: 24,
     fontWeight: "bold",
+    textAlign: "center",
   },
 });

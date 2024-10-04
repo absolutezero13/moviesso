@@ -6,9 +6,10 @@ import { Movie } from "./ Movie";
 interface Props {
   data: TMovie[];
   listEmptyComponent?: JSX.Element;
+  onEndReached?: () => void;
 }
 
-const MovieList: FC<Props> = ({ data, listEmptyComponent }) => {
+const MovieList: FC<Props> = ({ data, listEmptyComponent, onEndReached }) => {
   return (
     <FlatList
       data={data}
@@ -19,6 +20,8 @@ const MovieList: FC<Props> = ({ data, listEmptyComponent }) => {
       showsVerticalScrollIndicator={false}
       ListEmptyComponent={listEmptyComponent}
       contentContainerStyle={{ flexGrow: 1 }}
+      onEndReached={onEndReached}
+      windowSize={5}
     />
   );
 };

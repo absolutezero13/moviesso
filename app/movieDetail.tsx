@@ -1,4 +1,5 @@
 import { Colors } from "@/constants/Colors";
+import useFavoriteMovies from "@/store/useFavoriteMovies";
 import useMovieStore from "@/store/useMovieSotre";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect } from "react";
@@ -8,10 +9,13 @@ const SCREEN_WIDTH = Dimensions.get("window").width;
 
 const MovieDetail = () => {
   const { movies } = useMovieStore();
+  const { favoriteMovies } = useFavoriteMovies();
   const params = useLocalSearchParams<{ movieId: string }>();
   const navigation = useNavigation();
 
-  const movie = movies.find((movie) => movie.imdbID === params.movieId);
+  const movie =
+    movies.find((movie) => movie.imdbID === params.movieId) ??
+    favoriteMovies.find((movie) => movie.imdbID === params.movieId);
 
   useEffect(() => {
     navigation.setOptions({
