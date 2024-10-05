@@ -15,7 +15,11 @@ const Wrapper: FC<PropsWithChildren<Props>> = ({
     return <View style={styles.wrapper}>{children}</View>;
   }
 
-  return <SafeAreaView style={styles.wrapper}>{children}</SafeAreaView>;
+  return (
+    <SafeAreaView edges={["top"]} style={styles.wrapper}>
+      {children}
+    </SafeAreaView>
+  );
 };
 
 const styles = StyleSheet.create({

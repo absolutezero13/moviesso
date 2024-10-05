@@ -21,7 +21,6 @@ const MovieList: FC<Props> = ({ data, listEmptyComponent, onEndReached }) => {
       ListEmptyComponent={listEmptyComponent}
       contentContainerStyle={{ flexGrow: 1 }}
       onEndReached={onEndReached}
-      windowSize={5}
     />
   );
 };

@@ -1,10 +1,5 @@
 import axios from "axios";
-import {
-  MovieApiResponse,
-  MovieDetail,
-  MovieDetailApiResponse,
-  MovieRequestParams,
-} from "./types";
+import { MovieApiResponse, MovieDetail, MovieRequestParams } from "./types";
 
 const API_ENDPOINT = "https://movie-database-alternative.p.rapidapi.com";
 const API_KEY = "b957481432msh3b62100f3bb045ep19fc0ejsn704144e11e85";

@@ -33,14 +33,7 @@ const MovieDetail = () => {
 
   if (!movie) {
     return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: Colors.background,
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
+      <View style={styles.loading}>
         <ActivityIndicator size="large" color={Colors.text} />
       </View>
     );
@@ -66,6 +59,9 @@ const MovieDetail = () => {
         <Info label="Year" value={movie.Year} />
         <Info label="Type" value={movie.Type} />
         <Info label="IMDB ID" value={movie.imdbID} />
+        <Info label="Country" value={movie.Country} />
+        <Info label="Director" value={movie.Director} />
+        <Info label="Imdb Rating" value={movie.imdbRating} />
       </View>
     </View>
   );
@@ -95,12 +91,19 @@ const styles = StyleSheet.create({
   value: {
     color: Colors.text,
     fontSize: 20,
+    flex: 1,
   },
   infos: {
     backgroundColor: "rgba(0, 0, 0, 0.7)",
     borderRadius: 10,
     marginHorizontal: 20,
     padding: 10,
+  },
+  loading: {
+    flex: 1,
+    backgroundColor: Colors.background,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

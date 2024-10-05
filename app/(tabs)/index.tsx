@@ -5,17 +5,19 @@ import { apiService } from "@/services/api";
 import useMovieStore from "@/store/useMovieSotre";
 import Checkbox from "expo-checkbox";
 import { useEffect, useRef, useState } from "react";
-import { StyleSheet, View, Text, Alert, ActivityIndicator } from "react-native";
+import { StyleSheet, View, Text, ActivityIndicator } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 
 const INITIAL_SEARCH_TEXT = "superman";
 
 export default function HomeScreen() {
   const { movies } = useMovieStore();
+
   const textRef = useRef<string>("");
   const timeoutIdRef = useRef<NodeJS.Timeout>();
   const pageRef = useRef(1);
   const isFetchingRef = useRef(false);
+  const hasNextRef = useRef(true);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -58,13 +60,12 @@ export default function HomeScreen() {
         throw new Error("No movies found");
       }
 
-      console.log(data.Search);
+      hasNextRef.current = Number(data.totalResults) >= 10;
 
       useMovieStore.setState({
-        movies: [...movies, ...data.Search],
+        movies: page === 1 ? data.Search : [...movies, ...data.Search],
       });
     } catch (error) {
-      useMovieStore.setState({ movies: [] });
       if (page === 1) {
         setError(true);
       }
@@ -91,6 +92,9 @@ export default function HomeScreen() {
 
   const onEndReached = () => {
     if (loading) {
+      return;
+    }
+    if (!hasNextRef.current) {
       return;
     }
     getMovies(textRef.current || INITIAL_SEARCH_TEXT, pageRef.current + 1);
@@ -128,7 +132,6 @@ export default function HomeScreen() {
           onValueChange={setShowSeries}
         />
       </View>
-
       {error && (
         <View
           style={{
