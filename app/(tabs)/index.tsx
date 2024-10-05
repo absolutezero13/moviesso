@@ -1,12 +1,12 @@
+import { useEffect, useRef, useState } from "react";
+import { StyleSheet, View, Text, ActivityIndicator } from "react-native";
+import { TextInput } from "react-native-gesture-handler";
 import MovieList from "@/components/MovieList";
 import Wrapper from "@/components/Wrapper";
 import { Colors } from "@/constants/Colors";
 import { apiService } from "@/services/api";
 import useMovieStore from "@/store/useMovieSotre";
 import Checkbox from "expo-checkbox";
-import { useEffect, useRef, useState } from "react";
-import { StyleSheet, View, Text, ActivityIndicator } from "react-native";
-import { TextInput } from "react-native-gesture-handler";
 
 const INITIAL_SEARCH_TEXT = "superman";
 
@@ -133,19 +133,12 @@ export default function HomeScreen() {
         />
       </View>
       {error && (
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
+        <View style={styles.errorWrapper}>
           <Text style={styles.loadingText}>
             An error occurred while fetching movies 😢
           </Text>
         </View>
       )}
-
       {shouldRenderLoading ? (
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
@@ -169,7 +162,7 @@ export default function HomeScreen() {
         />
       )}
       {shouldRenderBottomLoading && (
-        <View style={{ position: "absolute", bottom: 0, alignSelf: "center" }}>
+        <View style={styles.bottomLoading}>
           <ActivityIndicator size="large" color={Colors.text} />
         </View>
       )}
@@ -220,5 +213,15 @@ const styles = StyleSheet.create({
     color: Colors.text,
     fontSize: 16,
     fontWeight: "500",
+  },
+  errorWrapper: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  bottomLoading: {
+    position: "absolute",
+    bottom: 0,
+    alignSelf: "center",
   },
 });
