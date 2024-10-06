@@ -10,19 +10,31 @@ import {
   StyleSheet,
   Dimensions,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
 const MovieDetail = () => {
-  const [movie, setMovie] = useState<TMovieDetail | null>(null);
   const params = useLocalSearchParams<{ movieId: string }>();
   const navigation = useNavigation();
+  const [movie, setMovie] = useState<TMovieDetail | null>(null);
+
+  const getMovieById = async () => {
+    try {
+      const data = await apiService.getMovieById(params.movieId);
+      if (!data.imdbID) {
+        throw new Error("Movie not found");
+      }
+      setMovie(data);
+    } catch (error) {
+      Alert.alert("Error", "Something went wrong");
+      navigation.goBack();
+    }
+  };
 
   useEffect(() => {
-    apiService.getMovieById(params.movieId).then((data) => {
-      setMovie(data);
-    });
+    getMovieById();
   }, []);
 
   useEffect(() => {
